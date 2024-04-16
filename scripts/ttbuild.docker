@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates python3 python3-venv python3-dev build-essential \
     libcairo-dev \
     curl \
+# verilog test environment
+    iverilog verilator \
 # needed for normal init environment
     dumb-init \
 # cleanup apt-list
@@ -26,7 +28,10 @@ RUN mkdir -p /ttsetup \
 
 # Python and Pip Dependencies
 RUN python3 -m venv /ttsetup/venv \
-    && /ttsetup/venv/bin/pip install -r /ttsetup/tt/requirements.txt
+    # tinytapeout requirements
+    && /ttsetup/venv/bin/pip install -r /ttsetup/tt/requirements.txt \
+    # tinytapeout cocotb testing requirements
+    && /ttsetup/venv/bin/pip install cocotb==1.8.1 pytest==8.1.1
 
 # Install nix (with openlane cache enabled)
 RUN echo "experimental-features = nix-command flakes\nextra-substituters = https://openlane.cachix.org\nextra-trusted-public-keys = openlane.cachix.org-1:qqdwh+QMNGmZAuyeQJTH9ErW57OWSvdtuwfBKdS254E=\n" > /ttsetup/nix-conf \
