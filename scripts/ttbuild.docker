@@ -43,5 +43,11 @@ RUN echo "experimental-features = nix-command flakes\nextra-substituters = https
 RUN git clone https://github.com/efabless/openlane2 ${OPENLANE2_ROOT} \
     && bash -ic 'nix-shell --pure ${OPENLANE2_ROOT}/shell.nix --command "openlane --smoke-test"'
 
+# Install OpenLane2 dependencies for openroad and klayout
+RUN bash -ic 'nix-shell ${OPENLANE2_ROOT}/shell.nix \
+    --command "openlane --flow openinopenroad"' || /bin/true
+RUN bash -ic 'nix-shell ${OPENLANE2_ROOT}/shell.nix \
+    --command "openlane --flow openinklayout"' || /bin/true
+
 # Use dumb-init as an entry point (for proper Unix signal handling)
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
