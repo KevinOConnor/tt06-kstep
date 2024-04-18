@@ -56,6 +56,23 @@ module tt_um_koconnor_kstep (
         .wb_dat_i(wb_dat_i), .wb_ack_i(wb_ack_i)
         );
 
+    // Output pin configuration
+    wire pcfg_wb_stb_i, pcfg_wb_cyc_i, pcfg_wb_we_i;
+    wire [3:0] pcfg_wb_adr_i;
+    wire [31:0] pcfg_wb_dat_i;
+    wire [31:0] pcfg_wb_dat_o;
+    wire pcfg_wb_ack_o;
+    pincfg pin_configuration(
+        .clk(clk), .rst(!rst_n),
+
+        .pins_out(uo_out), .pin_shutdown(signal_shutdown),
+
+        .wb_stb_i(pcfg_wb_stb_i), .wb_cyc_i(pcfg_wb_cyc_i),
+        .wb_we_i(pcfg_wb_we_i),
+        .wb_adr_i(pcfg_wb_adr_i), .wb_dat_i(pcfg_wb_dat_i),
+        .wb_dat_o(pcfg_wb_dat_o), .wb_ack_o(pcfg_wb_ack_o)
+        );
+
     // Clock counter
     wire [31:0] counter;
     wire cntr_wb_stb_i, cntr_wb_cyc_i, cntr_wb_we_i;
@@ -82,6 +99,11 @@ module tt_um_koconnor_kstep (
         .wb_adr_i(wb_adr_o), .wb_dat_i(wb_dat_o), .wb_dat_o(wb_dat_i),
         .wb_ack_o(wb_ack_i),
 
+        .pcfg_wb_stb_o(pcfg_wb_stb_i), .pcfg_wb_cyc_o(pcfg_wb_cyc_i),
+        .pcfg_wb_we_o(pcfg_wb_we_i),
+        .pcfg_wb_adr_o(pcfg_wb_adr_i), .pcfg_wb_dat_o(pcfg_wb_dat_i),
+        .pcfg_wb_dat_i(pcfg_wb_dat_o), .pcfg_wb_ack_i(pcfg_wb_ack_o),
+
         .cntr_wb_stb_o(cntr_wb_stb_i), .cntr_wb_cyc_o(cntr_wb_cyc_i),
         .cntr_wb_we_o(cntr_wb_we_i),
         .cntr_wb_adr_o(cntr_wb_adr_i), .cntr_wb_dat_o(cntr_wb_dat_i),
@@ -90,6 +112,5 @@ module tt_um_koconnor_kstep (
 
     // Temporarily assign all output wires
     assign signal_irq=0;
-    assign uo_out = ui_in + uio_in;
 
 endmodule

@@ -17,6 +17,7 @@ project:
   source_files:        
     - "project.v"
     - "spiwb.v"
+    - "pincfg.v"
     - "clockcounter.v"
     - "busdispatch.v"
 

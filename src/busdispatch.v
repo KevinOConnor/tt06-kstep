@@ -13,20 +13,33 @@ module busdispatch (
     output reg [31:0] wb_dat_o, output reg wb_ack_o,
 
     // Modules
+    output reg pcfg_wb_stb_o, output pcfg_wb_cyc_o, output pcfg_wb_we_o,
+    output [3:0] pcfg_wb_adr_o, output [31:0] pcfg_wb_dat_o,
+    input [31:0] pcfg_wb_dat_i, input pcfg_wb_ack_i,
+
     output reg cntr_wb_stb_o, output cntr_wb_cyc_o, output cntr_wb_we_o,
     output [3:0] cntr_wb_adr_o, output [31:0] cntr_wb_dat_o,
     input [31:0] cntr_wb_dat_i, input cntr_wb_ack_i
     );
 
     // Module assignment
+    localparam PCFG_ADDR = 3'h1;
+    assign pcfg_wb_cyc_o=wb_cyc_i, pcfg_wb_we_o=wb_we_i;
+    assign pcfg_wb_adr_o=wb_adr_i, pcfg_wb_dat_o=wb_dat_i;
     localparam CNTR_ADDR = 3'h7;
     assign cntr_wb_cyc_o=wb_cyc_i, cntr_wb_we_o=wb_we_i;
     assign cntr_wb_adr_o=wb_adr_i, cntr_wb_dat_o=wb_dat_i;
 
     always @(*) begin
+        pcfg_wb_stb_o = 0;
         cntr_wb_stb_o = 0;
 
         case (wb_adr_i[6:4])
+        PCFG_ADDR: begin
+            pcfg_wb_stb_o = wb_stb_i;
+            wb_dat_o = pcfg_wb_dat_i;
+            wb_ack_o = pcfg_wb_ack_i;
+        end
         CNTR_ADDR: begin
             cntr_wb_stb_o = wb_stb_i;
             wb_dat_o = cntr_wb_dat_i;
