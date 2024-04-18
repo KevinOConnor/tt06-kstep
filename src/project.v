@@ -39,8 +39,25 @@ module tt_um_koconnor_kstep (
     assign uio_out[1:0] = 0, uio_out[3] = 0, uio_out[5] = 0, uio_out[7:6] = 0;
     assign uio_oe[7:6] = 0;
 
+    // SPI to wishbone command handling
+    wire wb_stb_o, wb_cyc_o, wb_we_o;
+    wire [6:0] wb_adr_o;
+    wire [31:0] wb_dat_o;
+    wire [31:0] wb_dat_i;
+    wire wb_ack_i;
+    spiwb command_builder(
+        .clk(clk), .rst(!rst_n),
+
+        .pin_cs(spi_cs), .pin_mosi(spi_mosi), .pin_miso(spi_miso),
+        .pin_sclk(spi_sclk),
+
+        .wb_stb_o(wb_stb_o), .wb_cyc_o(wb_cyc_o), .wb_we_o(wb_we_o),
+        .wb_adr_o(wb_adr_o), .wb_dat_o(wb_dat_o),
+        .wb_dat_i(wb_dat_i), .wb_ack_i(wb_ack_i)
+        );
+
     // Temporarily assign all output wires
-    assign spi_miso=0, signal_irq=0;
+    assign signal_irq=0;
     assign uo_out = ui_in + uio_in;
 
 endmodule
