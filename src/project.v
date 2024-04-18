@@ -56,6 +56,24 @@ module tt_um_koconnor_kstep (
         .wb_dat_i(wb_dat_i), .wb_ack_i(wb_ack_i)
         );
 
+    // Clock counter
+    wire [31:0] counter;
+    wire cntr_wb_stb_i, cntr_wb_cyc_i, cntr_wb_we_i;
+    wire [3:0] cntr_wb_adr_i;
+    wire [31:0] cntr_wb_dat_i;
+    wire [31:0] cntr_wb_dat_o;
+    wire cntr_wb_ack_o;
+    clockcounter clock_counter(
+        .clk(clk), .rst(!rst_n),
+
+        .counter(counter),
+
+        .wb_stb_i(cntr_wb_stb_i), .wb_cyc_i(cntr_wb_cyc_i),
+        .wb_we_i(cntr_wb_we_i),
+        .wb_adr_i(cntr_wb_adr_i), .wb_dat_i(cntr_wb_dat_i),
+        .wb_dat_o(cntr_wb_dat_o), .wb_ack_o(cntr_wb_ack_o)
+        );
+
     // Temporarily assign all output wires
     assign signal_irq=0;
     assign uo_out = ui_in + uio_in;
