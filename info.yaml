@@ -18,6 +18,7 @@ project:
     - "project.v"
     - "spiwb.v"
     - "clockcounter.v"
+    - "busdispatch.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:

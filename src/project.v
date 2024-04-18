@@ -74,6 +74,20 @@ module tt_um_koconnor_kstep (
         .wb_dat_o(cntr_wb_dat_o), .wb_ack_o(cntr_wb_ack_o)
         );
 
+    // Bus routing
+    busdispatch bus_dispatcher(
+        .clk(clk), .rst(!rst_n),
+
+        .wb_stb_i(wb_stb_o), .wb_cyc_i(wb_cyc_o), .wb_we_i(wb_we_o),
+        .wb_adr_i(wb_adr_o), .wb_dat_i(wb_dat_o), .wb_dat_o(wb_dat_i),
+        .wb_ack_o(wb_ack_i),
+
+        .cntr_wb_stb_o(cntr_wb_stb_i), .cntr_wb_cyc_o(cntr_wb_cyc_i),
+        .cntr_wb_we_o(cntr_wb_we_i),
+        .cntr_wb_adr_o(cntr_wb_adr_i), .cntr_wb_dat_o(cntr_wb_dat_i),
+        .cntr_wb_dat_i(cntr_wb_dat_o), .cntr_wb_ack_i(cntr_wb_ack_o)
+        );
+
     // Temporarily assign all output wires
     assign signal_irq=0;
     assign uo_out = ui_in + uio_in;
