@@ -56,3 +56,9 @@ async def test_kstep(dut):
     rv = await spi.read(0x70)
     assert rv == 0x80abcefd
     await ClockCycles(dut.clk, 10)
+
+    dut._log.info("Write pin polarity test")
+    assert dut.uo_out[2].value == 0
+    await spi.write(0x10, 0x04)
+    await ClockCycles(dut.clk, 10)
+    assert dut.uo_out[2].value == 1
