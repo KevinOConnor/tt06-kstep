@@ -1,4 +1,5 @@
-/*
+/* Top-level verilog definitions for step/dir stepper motor pulse scheduler
+ *
  * Copyright (c) 2024  Kevin O'Connor <kevin@koconnor.net>
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,9 +17,30 @@ module tt_um_koconnor_kstep (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-  // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out = 0;
-  assign uio_oe  = 0;
+    // Wires used for spi commands
+    wire spi_cs, spi_mosi, spi_miso, spi_sclk;
+    assign spi_cs = uio_in[0];
+    assign uio_oe[0] = 0;
+    assign spi_mosi = uio_in[1];
+    assign uio_oe[1] = 0;
+    assign uio_out[2] = spi_miso;
+    assign uio_oe[2] = 1;
+    assign spi_sclk = uio_in[3];
+    assign uio_oe[3] = 0;
+
+    // Wires used for command signals
+    wire signal_irq, signal_shutdown;
+    assign uio_out[4] = signal_irq;
+    assign uio_oe[4] = 1;
+    assign signal_shutdown = uio_in[5];
+    assign uio_oe[5] = 0;
+
+    // Assign remaining uio wires to zero.
+    assign uio_out[1:0] = 0, uio_out[3] = 0, uio_out[5] = 0, uio_out[7:6] = 0;
+    assign uio_oe[7:6] = 0;
+
+    // Temporarily assign all output wires
+    assign spi_miso=0, signal_irq=0;
+    assign uo_out = ui_in + uio_in;
 
 endmodule
