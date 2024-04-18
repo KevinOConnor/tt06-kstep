@@ -8,15 +8,28 @@ from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 import cocotbext.spi
 
+class kstep_spi:
+    def __init__(self, dut):
+        spi_bus = cocotbext.spi.SpiBus.from_entity(dut, prefix="spi")
+        spi_config = cocotbext.spi.SpiConfig(sclk_freq=1000000)
+        self.spi = cocotbext.spi.SpiMaster(spi_bus, spi_config)
+    async def send(self, is_write, addr, val):
+        v = [(is_write << 7) | (addr & 0x7f), (val >> 24) & 0xff,
+             (val >> 16) & 0xff, (val >> 8) & 0xff, val & 0xff]
+        await self.spi.write(v, burst=True)
+        r = await self.spi.read()
+        return (r[1] << 24) | (r[2] << 16) | (r[3] << 8) | r[4]
+    async def write(self, addr, val):
+        await self.send(True, addr, val)
+    async def read(self, addr):
+        return await self.send(False, addr, 0)
 
 @cocotb.test()
 async def test_kstep(dut):
     dut._log.info("Start")
 
     # Create spi device
-    spi_bus = cocotbext.spi.SpiBus.from_entity(dut, prefix="spi")
-    spi_config = cocotbext.spi.SpiConfig(sclk_freq=1000000)
-    spi = cocotbext.spi.SpiMaster(spi_bus, spi_config)
+    spi = kstep_spi(dut)
 
     # Create clock
     clock = Clock(dut.clk, 20, units="ns")
@@ -33,16 +46,13 @@ async def test_kstep(dut):
 
     # Begin tests
     dut._log.info("Read clock test")
-    await spi.write([0x70, 0x00, 0x00, 0x00, 0x00], burst=True)
-    read_bytes = await spi.read()
-    assert list(read_bytes[1:]) == [0x00, 0x00, 0x01, 0xab]
+    rv = await spi.read(0x70)
+    assert rv == 0x1ab
     await ClockCycles(dut.clk, 10)
 
     dut._log.info("Write clock test")
-    await spi.write([0xf0, 0x80, 0xab, 0xcd, 0x01], burst=True)
-    read_bytes = await spi.read()
+    await spi.write(0x70, 0x80abcd01)
     await ClockCycles(dut.clk, 10)
-    await spi.write([0x70, 0x00, 0x00, 0x00, 0x00], burst=True)
-    read_bytes = await spi.read()
-    assert list(read_bytes[1:]) == [0x80, 0xab, 0xce, 0xfd]
+    rv = await spi.read(0x70)
+    assert rv == 0x80abcefd
     await ClockCycles(dut.clk, 10)
