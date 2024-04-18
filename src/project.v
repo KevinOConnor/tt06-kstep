@@ -73,6 +73,29 @@ module tt_um_koconnor_kstep (
         .wb_dat_o(pcfg_wb_dat_o), .wb_ack_o(pcfg_wb_ack_o)
         );
 
+    // Movement queue
+    wire [63:0] mq_data;
+    wire mq_avail, mq_pull;
+    wire mq_wb_stb_i, mq_wb_cyc_i, mq_wb_we_i;
+    wire [3:0] mq_wb_adr_i;
+    wire [31:0] mq_wb_dat_i;
+    wire [31:0] mq_wb_dat_o;
+    wire mq_wb_ack_o;
+    moveq movement_queue(
+        .clk(clk), .rst(!rst_n),
+
+        .pin_have_space(signal_irq),
+        .mq_data(mq_data), .mq_avail(mq_avail), .mq_pull(mq_pull),
+
+        .wb_stb_i(mq_wb_stb_i), .wb_cyc_i(mq_wb_cyc_i),
+        .wb_we_i(mq_wb_we_i),
+        .wb_adr_i(mq_wb_adr_i), .wb_dat_i(mq_wb_dat_i),
+        .wb_dat_o(mq_wb_dat_o), .wb_ack_o(mq_wb_ack_o)
+        );
+
+    // XXX
+    assign mq_pull = 0;
+
     // Clock counter
     wire [31:0] counter;
     wire cntr_wb_stb_i, cntr_wb_cyc_i, cntr_wb_we_i;
@@ -104,13 +127,15 @@ module tt_um_koconnor_kstep (
         .pcfg_wb_adr_o(pcfg_wb_adr_i), .pcfg_wb_dat_o(pcfg_wb_dat_i),
         .pcfg_wb_dat_i(pcfg_wb_dat_o), .pcfg_wb_ack_i(pcfg_wb_ack_o),
 
+        .mq_wb_stb_o(mq_wb_stb_i), .mq_wb_cyc_o(mq_wb_cyc_i),
+        .mq_wb_we_o(mq_wb_we_i),
+        .mq_wb_adr_o(mq_wb_adr_i), .mq_wb_dat_o(mq_wb_dat_i),
+        .mq_wb_dat_i(mq_wb_dat_o), .mq_wb_ack_i(mq_wb_ack_o),
+
         .cntr_wb_stb_o(cntr_wb_stb_i), .cntr_wb_cyc_o(cntr_wb_cyc_i),
         .cntr_wb_we_o(cntr_wb_we_i),
         .cntr_wb_adr_o(cntr_wb_adr_i), .cntr_wb_dat_o(cntr_wb_dat_i),
         .cntr_wb_dat_i(cntr_wb_dat_o), .cntr_wb_ack_i(cntr_wb_ack_o)
         );
-
-    // Temporarily assign all output wires
-    assign signal_irq=0;
 
 endmodule

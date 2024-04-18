@@ -17,6 +17,10 @@ module busdispatch (
     output [3:0] pcfg_wb_adr_o, output [31:0] pcfg_wb_dat_o,
     input [31:0] pcfg_wb_dat_i, input pcfg_wb_ack_i,
 
+    output reg mq_wb_stb_o, output mq_wb_cyc_o, output mq_wb_we_o,
+    output [3:0] mq_wb_adr_o, output [31:0] mq_wb_dat_o,
+    input [31:0] mq_wb_dat_i, input mq_wb_ack_i,
+
     output reg cntr_wb_stb_o, output cntr_wb_cyc_o, output cntr_wb_we_o,
     output [3:0] cntr_wb_adr_o, output [31:0] cntr_wb_dat_o,
     input [31:0] cntr_wb_dat_i, input cntr_wb_ack_i
@@ -26,12 +30,16 @@ module busdispatch (
     localparam PCFG_ADDR = 3'h1;
     assign pcfg_wb_cyc_o=wb_cyc_i, pcfg_wb_we_o=wb_we_i;
     assign pcfg_wb_adr_o=wb_adr_i, pcfg_wb_dat_o=wb_dat_i;
+    localparam MQ_ADDR = 3'h2;
+    assign mq_wb_cyc_o=wb_cyc_i, mq_wb_we_o=wb_we_i;
+    assign mq_wb_adr_o=wb_adr_i, mq_wb_dat_o=wb_dat_i;
     localparam CNTR_ADDR = 3'h7;
     assign cntr_wb_cyc_o=wb_cyc_i, cntr_wb_we_o=wb_we_i;
     assign cntr_wb_adr_o=wb_adr_i, cntr_wb_dat_o=wb_dat_i;
 
     always @(*) begin
         pcfg_wb_stb_o = 0;
+        mq_wb_stb_o = 0;
         cntr_wb_stb_o = 0;
 
         case (wb_adr_i[6:4])
@@ -39,6 +47,11 @@ module busdispatch (
             pcfg_wb_stb_o = wb_stb_i;
             wb_dat_o = pcfg_wb_dat_i;
             wb_ack_o = pcfg_wb_ack_i;
+        end
+        MQ_ADDR: begin
+            mq_wb_stb_o = wb_stb_i;
+            wb_dat_o = mq_wb_dat_i;
+            wb_ack_o = mq_wb_ack_i;
         end
         CNTR_ADDR: begin
             cntr_wb_stb_o = wb_stb_i;
