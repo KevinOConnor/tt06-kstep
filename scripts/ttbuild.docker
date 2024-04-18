@@ -26,13 +26,6 @@ ENV PDK=sky130A
 RUN mkdir -p /ttsetup \
     && git clone -b tt06 https://github.com/TinyTapeout/tt-support-tools /ttsetup/tt
 
-# Python and Pip Dependencies
-RUN python3 -m venv /ttsetup/venv \
-    # tinytapeout requirements
-    && /ttsetup/venv/bin/pip install -r /ttsetup/tt/requirements.txt \
-    # tinytapeout cocotb testing requirements
-    && /ttsetup/venv/bin/pip install cocotb==1.8.1 pytest==8.1.1
-
 # Install nix (with openlane cache enabled)
 RUN echo "experimental-features = nix-command flakes\nextra-substituters = https://openlane.cachix.org\nextra-trusted-public-keys = openlane.cachix.org-1:qqdwh+QMNGmZAuyeQJTH9ErW57OWSvdtuwfBKdS254E=\n" > /ttsetup/nix-conf \
     && curl -L https://nixos.org/nix/install \
@@ -48,6 +41,14 @@ RUN bash -ic 'nix-shell ${OPENLANE2_ROOT}/shell.nix \
     --command "openlane --flow openinopenroad"' || /bin/true
 RUN bash -ic 'nix-shell ${OPENLANE2_ROOT}/shell.nix \
     --command "openlane --flow openinklayout"' || /bin/true
+
+# Python and Pip Dependencies
+RUN python3 -m venv /ttsetup/venv \
+    # tinytapeout requirements
+    && /ttsetup/venv/bin/pip install -r /ttsetup/tt/requirements.txt \
+    # tinytapeout cocotb testing requirements
+    && /ttsetup/venv/bin/pip install cocotb==1.8.1 pytest==8.1.1 \
+        cocotbext-spi==0.4.0
 
 # Use dumb-init as an entry point (for proper Unix signal handling)
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]

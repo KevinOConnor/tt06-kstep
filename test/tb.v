@@ -14,14 +14,21 @@ module tb ();
   end
 
   // Wire up the inputs and outputs:
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
+  wire clk;
+  wire rst_n;
+  wire ena;
+  wire [7:0] ui_in;
+  wire [7:0] uio_in;
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
+
+  // Wires for cocotbext.spi
+  wire spi_cs, spi_mosi, spi_miso, spi_sclk;
+  assign uio_in[0] = spi_cs;
+  assign uio_in[1] = spi_mosi;
+  assign spi_miso = uio_out[2];
+  assign uio_in[3] = spi_sclk;
 
   // Replace tt_um_example with your module name:
   tt_um_koconnor_kstep user_project (
