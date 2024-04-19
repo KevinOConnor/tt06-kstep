@@ -10,6 +10,7 @@ import cocotbext.spi
 
 class kstep_spi:
     def __init__(self, dut):
+        self.dut = dut
         spi_bus = cocotbext.spi.SpiBus.from_entity(dut, prefix="spi")
         spi_config = cocotbext.spi.SpiConfig(sclk_freq=1000000)
         self.spi = cocotbext.spi.SpiMaster(spi_bus, spi_config)
@@ -18,6 +19,7 @@ class kstep_spi:
              (val >> 16) & 0xff, (val >> 8) & 0xff, val & 0xff]
         await self.spi.write(v, burst=True)
         r = await self.spi.read()
+        await ClockCycles(self.dut.clk, 10)
         return (r[1] << 24) | (r[2] << 16) | (r[3] << 8) | r[4]
     async def write(self, addr, val):
         await self.send(True, addr, val)
@@ -39,6 +41,7 @@ async def test_kstep(dut):
     dut._log.info("Reset")
     dut.ena.value = 1
     dut.ui_in.value = 0
+    dut.signal_shutdown.value = 0
     dut.spi_cs.value = 1
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
@@ -48,17 +51,21 @@ async def test_kstep(dut):
     dut._log.info("Read clock test")
     rv = await spi.read(0x70)
     assert rv == 0x1ab
-    await ClockCycles(dut.clk, 10)
 
     dut._log.info("Write clock test")
     await spi.write(0x70, 0x80abcd01)
-    await ClockCycles(dut.clk, 10)
     rv = await spi.read(0x70)
     assert rv == 0x80abcefd
-    await ClockCycles(dut.clk, 10)
 
     dut._log.info("Write pin polarity test")
     assert dut.uo_out[2].value == 0
     await spi.write(0x10, 0x04)
-    await ClockCycles(dut.clk, 10)
     assert dut.uo_out[2].value == 1
+
+    dut._log.info("Step test")
+    await spi.write(0x70, 0xffffc000) # clear clock
+    await spi.write(0x21, 100) # interval
+    await spi.write(0x20, (20 << 16) | 5) # count, add
+    await spi.write(0x21, 500) # interval
+    await spi.write(0x20, (20 << 16) | (-15 & 0xffff)) # count, add
+    await ClockCycles(dut.clk, 25000)

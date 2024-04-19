@@ -29,6 +29,8 @@ module tb ();
   assign uio_in[1] = spi_mosi;
   assign spi_miso = uio_out[2];
   assign uio_in[3] = spi_sclk;
+  wire signal_shutdown;
+  assign uio_in[5] = signal_shutdown;
 
   // Replace tt_um_example with your module name:
   tt_um_koconnor_kstep user_project (
