@@ -57,7 +57,7 @@ module tt_um_koconnor_kstep (
         );
 
     // Output pin configuration
-    wire pcfg_step_pulse;
+    wire pcfg_step_pulse, pcfg_step_dir;
     wire pcfg_wb_stb_i, pcfg_wb_cyc_i, pcfg_wb_we_i;
     wire [3:0] pcfg_wb_adr_i;
     wire [31:0] pcfg_wb_dat_i;
@@ -67,7 +67,7 @@ module tt_um_koconnor_kstep (
         .clk(clk), .rst(!rst_n),
 
         .pins_out(uo_out), .pin_shutdown(signal_shutdown),
-        .step_pulse(pcfg_step_pulse),
+        .step_pulse(pcfg_step_pulse), .step_dir(pcfg_step_dir),
 
         .wb_stb_i(pcfg_wb_stb_i), .wb_cyc_i(pcfg_wb_cyc_i),
         .wb_we_i(pcfg_wb_we_i),
@@ -76,7 +76,7 @@ module tt_um_koconnor_kstep (
         );
 
     // Movement queue
-    wire [63:0] mq_data;
+    wire [64:0] mq_data;
     wire mq_avail, mq_pull;
     wire mq_wb_stb_i, mq_wb_cyc_i, mq_wb_we_i;
     wire [3:0] mq_wb_adr_i;
@@ -105,7 +105,7 @@ module tt_um_koconnor_kstep (
     schedstep schedule_step(
         .clk(clk), .rst(!rst_n),
 
-        .step_pulse(pcfg_step_pulse),
+        .step_pulse(pcfg_step_pulse), .step_dir(pcfg_step_dir),
         .counter(counter),
         .mq_data(mq_data), .mq_avail(mq_avail), .mq_pull(mq_pull),
 

@@ -67,6 +67,7 @@ async def test_kstep(dut):
     await spi.write(0x70, 0xffffc000) # clear clock
     await spi.write(0x21, 100) # interval
     await spi.write(0x20, (20 << 16) | 5) # count, add
+    await spi.write(0x22, 1) # dir
     await spi.write(0x21, 500) # interval
     await spi.write(0x20, (20 << 16) | (-15 & 0xffff)) # count, add
     await ClockCycles(dut.clk, 25000)

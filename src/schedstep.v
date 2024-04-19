@@ -7,9 +7,9 @@
 module schedstep (
     input clk, rst,
 
-    output step_pulse,
+    output step_pulse, output reg step_dir,
     input [31:0] counter,
-    input [63:0] mq_data, input mq_avail, output mq_pull,
+    input [64:0] mq_data, input mq_avail, output mq_pull,
 
     input wb_stb_i, input wb_cyc_i, input wb_we_i,
     input [3:0] wb_adr_i,
@@ -23,6 +23,7 @@ module schedstep (
     reg [15:0] count;
     reg [15:0] add;
     wire [31:0] sadd = { add[15] ? 16'hffff : 16'h0000, add };
+    wire next_step_dir = mq_data[64];
     wire [31:0] next_interval = mq_data[63:32];
     wire [15:0] next_count = mq_data[31:16];
     wire [15:0] next_add = mq_data[15:0];
@@ -31,8 +32,11 @@ module schedstep (
     reg [31:0] next_step_clock;
     wire is_command_reset;
     always @(posedge clk) begin
-        if (rst || (!is_active && is_command_reset)) begin
+        if (rst) begin
+            next_step_clock <= 0;
             count <= 0;
+            step_dir <= 0;
+        end else if (!is_active && is_command_reset) begin
             next_step_clock <= 0;
         end else if (step_pulse) begin
             next_step_clock <= next_step_clock + interval;
@@ -43,6 +47,7 @@ module schedstep (
             interval <= next_interval + next_sadd;
             count <= next_count;
             add <= next_add;
+            step_dir <= next_step_dir;
         end
     end
     assign step_pulse = is_active && next_step_clock == counter;

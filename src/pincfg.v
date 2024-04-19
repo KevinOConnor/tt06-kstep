@@ -7,7 +7,7 @@
 module pincfg (
     input clk, rst,
 
-    input step_pulse,
+    input step_pulse, input step_dir,
     output [7:0] pins_out, input pin_shutdown,
 
     input wb_stb_i, input wb_cyc_i, input wb_we_i,
@@ -49,6 +49,12 @@ module pincfg (
             dur_count <= step_duration;
     end
 
+    // Step direction tracking
+    reg active_step_dir;
+    always @(posedge clk)
+        if (!is_in_step_pulse)
+            active_step_dir <= step_dir;
+
     // Shutdown tracking
     reg [1:0] buf_shutdown;
     always @(posedge clk)
@@ -62,10 +68,12 @@ module pincfg (
             in_shutdown <= 1;
     end
     wire is_pulse_active = is_in_step_pulse && !in_shutdown;
+    wire is_dir_active = active_step_dir && !in_shutdown;
 
     // Pin output
     assign pins_out[0] = polarity[0] ^ is_pulse_active;
-    assign pins_out[7:1] = polarity[7:1];
+    assign pins_out[1] = polarity[1] ^ is_dir_active;
+    assign pins_out[7:2] = polarity[7:2];
 
     // Wishbone command handling
     wire is_command = wb_cyc_i && wb_stb_i && wb_we_i;
