@@ -24,7 +24,7 @@ module pincfg (
         if (rst)
             polarity <= 0;
         else if (is_command_set_polarity)
-            polarity <= wb_dat_i;
+            polarity <= wb_dat_i[7:0];
     end
 
     // Step pulse duration
@@ -34,7 +34,7 @@ module pincfg (
         if (rst)
             step_duration <= 0;
         else if (is_command_set_step_duration)
-            step_duration <= wb_dat_i;
+            step_duration <= wb_dat_i[15:0];
     end
 
     // Step pin pulsing
