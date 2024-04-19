@@ -7,6 +7,7 @@
 module pincfg (
     input clk, rst,
 
+    input step_pulse,
     output [7:0] pins_out, input pin_shutdown,
 
     input wb_stb_i, input wb_cyc_i, input wb_we_i,

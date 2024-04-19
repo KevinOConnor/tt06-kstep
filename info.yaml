@@ -19,6 +19,7 @@ project:
     - "spiwb.v"
     - "pincfg.v"
     - "moveq.v"
+    - "schedstep.v"
     - "clockcounter.v"
     - "busdispatch.v"
 

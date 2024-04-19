@@ -57,6 +57,7 @@ module tt_um_koconnor_kstep (
         );
 
     // Output pin configuration
+    wire pcfg_step_pulse;
     wire pcfg_wb_stb_i, pcfg_wb_cyc_i, pcfg_wb_we_i;
     wire [3:0] pcfg_wb_adr_i;
     wire [31:0] pcfg_wb_dat_i;
@@ -66,6 +67,7 @@ module tt_um_koconnor_kstep (
         .clk(clk), .rst(!rst_n),
 
         .pins_out(uo_out), .pin_shutdown(signal_shutdown),
+        .step_pulse(pcfg_step_pulse),
 
         .wb_stb_i(pcfg_wb_stb_i), .wb_cyc_i(pcfg_wb_cyc_i),
         .wb_we_i(pcfg_wb_we_i),
@@ -93,11 +95,27 @@ module tt_um_koconnor_kstep (
         .wb_dat_o(mq_wb_dat_o), .wb_ack_o(mq_wb_ack_o)
         );
 
-    // XXX
-    assign mq_pull = 0;
+    // Scheduler for step signal
+    wire [31:0] counter;
+    wire sstep_wb_stb_i, sstep_wb_cyc_i, sstep_wb_we_i;
+    wire [3:0] sstep_wb_adr_i;
+    wire [31:0] sstep_wb_dat_i;
+    wire [31:0] sstep_wb_dat_o;
+    wire sstep_wb_ack_o;
+    schedstep schedule_step(
+        .clk(clk), .rst(!rst_n),
+
+        .step_pulse(pcfg_step_pulse),
+        .counter(counter),
+        .mq_data(mq_data), .mq_avail(mq_avail), .mq_pull(mq_pull),
+
+        .wb_stb_i(sstep_wb_stb_i), .wb_cyc_i(sstep_wb_cyc_i),
+        .wb_we_i(sstep_wb_we_i),
+        .wb_adr_i(sstep_wb_adr_i), .wb_dat_i(sstep_wb_dat_i),
+        .wb_dat_o(sstep_wb_dat_o), .wb_ack_o(sstep_wb_ack_o)
+        );
 
     // Clock counter
-    wire [31:0] counter;
     wire cntr_wb_stb_i, cntr_wb_cyc_i, cntr_wb_we_i;
     wire [3:0] cntr_wb_adr_i;
     wire [31:0] cntr_wb_dat_i;
@@ -131,6 +149,11 @@ module tt_um_koconnor_kstep (
         .mq_wb_we_o(mq_wb_we_i),
         .mq_wb_adr_o(mq_wb_adr_i), .mq_wb_dat_o(mq_wb_dat_i),
         .mq_wb_dat_i(mq_wb_dat_o), .mq_wb_ack_i(mq_wb_ack_o),
+
+        .sstep_wb_stb_o(sstep_wb_stb_i), .sstep_wb_cyc_o(sstep_wb_cyc_i),
+        .sstep_wb_we_o(sstep_wb_we_i),
+        .sstep_wb_adr_o(sstep_wb_adr_i), .sstep_wb_dat_o(sstep_wb_dat_i),
+        .sstep_wb_dat_i(sstep_wb_dat_o), .sstep_wb_ack_i(sstep_wb_ack_o),
 
         .cntr_wb_stb_o(cntr_wb_stb_i), .cntr_wb_cyc_o(cntr_wb_cyc_i),
         .cntr_wb_we_o(cntr_wb_we_i),
