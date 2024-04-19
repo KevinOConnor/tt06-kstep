@@ -63,6 +63,7 @@ async def test_kstep(dut):
     assert dut.uo_out[2].value == 1
 
     dut._log.info("Step test")
+    await spi.write(0x12, 8) # pulse duration
     await spi.write(0x70, 0xffffc000) # clear clock
     await spi.write(0x21, 100) # interval
     await spi.write(0x20, (20 << 16) | 5) # count, add
